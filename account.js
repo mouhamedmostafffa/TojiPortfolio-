@@ -10,7 +10,7 @@
     const API_BASE_URL = window.TojiAPI?.API_BASE_URL ||
         (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? 'http://localhost:5000/api'
-            : 'https://portfolio-backend-production-604c.up.railway.app/api');
+            : 'https://portfolio-backend-production-3dc5.up.railway.app/api');
 
     // ── إدارة توكن المستخدم — منفصل تمامًا عن توكن الأدمن ──────
     const USER_TOKEN_KEY = 'toji_user_token';

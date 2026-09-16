@@ -2147,7 +2147,7 @@ Do not resell the customized public version as a separate template unless your s
         dot.className = 'status-dot syncing';
         text.textContent = 'جارٍ التحقق...';
         try {
-            const res = await fetch(`${window.TojiAPI ? API_BASE_URL.replace('/api','') : 'https://portfolio-backend-production-604c.up.railway.app'}/health`);
+            const res = await fetch(`${window.TojiAPI ? API_BASE_URL.replace('/api','') : 'https://portfolio-backend-production-3dc5.up.railway.app'}/health`);
             if (res.ok) {
                 dot.className  = 'status-dot online';
                 text.textContent = '🟢 السيرفر متصل';

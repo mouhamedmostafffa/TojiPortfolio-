@@ -3419,7 +3419,7 @@ window.addEventListener('beforeunload', () => {
 // ============================================================
 (function initTracking() {
     if (!window.TojiAPI) return;
-    const API = 'https://portfolio-backend-production-604c.up.railway.app/api/analytics';
+    const API = 'https://portfolio-backend-production-3dc5.up.railway.app/api/analytics';
 
     // كشف الجهاز
     function detectDevice() {

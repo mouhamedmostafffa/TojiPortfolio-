@@ -183,7 +183,8 @@ const AnalyticsAPI = {
     getStats: () => apiFetch('/analytics/stats'),
     getVisitors: (page = 1, limit = 20) =>
         apiFetch(`/analytics/visitors?page=${page}&limit=${limit}`),
-    sendDailySummary: () => apiFetch('/analytics/send-daily-summary', { method: 'POST' })
+    sendDailySummary: () => apiFetch('/analytics/send-daily-summary', { method: 'POST' }),
+    getActivity: () => apiFetch('/analytics/activity')
 };
 
 // تصدير موحد لكل الـ APIs
@@ -272,6 +273,16 @@ const BadgeAPI = {
     remove:    (id)    => apiFetch('/admin/users/badges/' + id, { method: 'DELETE' }),
     award:     (userId, key) => apiFetch(`/admin/users/${userId}/badges/${encodeURIComponent(key)}`, { method: 'POST' }),
     revoke:    (userId, key) => apiFetch(`/admin/users/${userId}/badges/${encodeURIComponent(key)}`, { method: 'DELETE' })
+};
+
+// ============================================================
+// Reply Template API — ردود جاهزة للأدمن في صندوق الرسايل
+// ============================================================
+const ReplyTemplateAPI = {
+    getAll:    ()      => apiFetch('/admin/users/reply-templates'),
+    create:    (data)  => apiFetch('/admin/users/reply-templates',       { method: 'POST',   body: JSON.stringify(data) }),
+    update:    (id, d) => apiFetch('/admin/users/reply-templates/' + id, { method: 'PUT',    body: JSON.stringify(d)    }),
+    remove:    (id)    => apiFetch('/admin/users/reply-templates/' + id, { method: 'DELETE' })
 };
 
 // ============================================================
@@ -380,4 +391,4 @@ const BookingAPI = {
     remove:       (id)       => apiFetch(`/booking/${id}`, { method: 'DELETE' })
 };
 
-window.TojiAPI = { TokenManager, AuthAPI, ProjectsAPI, MessagesAPI, ConfigAPI, AnalyticsAPI, SongsAPI, WipAPI, AiAPI, AiMoodAPI, BadgeAPI, LinksAPI, GuestbookAPI, ReactionsAPI, PricingAPI, ProcessAPI, BlogAPI, ChangelogAPI, StackAPI, QuoteAPI, BookingAPI, API_BASE_URL };
+window.TojiAPI = { TokenManager, AuthAPI, ProjectsAPI, MessagesAPI, ConfigAPI, AnalyticsAPI, SongsAPI, WipAPI, AiAPI, AiMoodAPI, BadgeAPI, ReplyTemplateAPI, LinksAPI, GuestbookAPI, ReactionsAPI, PricingAPI, ProcessAPI, BlogAPI, ChangelogAPI, StackAPI, QuoteAPI, BookingAPI, API_BASE_URL };

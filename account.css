@@ -977,3 +977,173 @@ a.acc-ig-stat:hover strong { color: var(--primary); }
 }
 .acc-song-remove:hover { background: rgba(255,107,107,0.1); }
 
+/* ── تخصيص البروفايل: غلاف، لون، تصنيف ── */
+.acc-cover-preview {
+    position: relative;
+    height: 140px;
+    border-radius: 14px;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--glass-bg), var(--glass-strong));
+    border: 1px solid var(--glass-border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    padding: 10px;
+}
+.acc-cover-preview img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.acc-cover-upload-btn { position: relative; z-index: 1; cursor: pointer; }
+#accentColorInput { height: 42px; padding: 4px; cursor: pointer; }
+
+/* ── غلاف/تاج/لون على البروفايل نفسه (account.html + profile.html) ── */
+.acc-profile-cover {
+    height: 140px;
+    border-radius: 20px 20px 0 0;
+    margin: -1px -1px 0;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--glass-bg);
+}
+.acc-profile-card.has-cover { padding-top: 0; overflow: hidden; }
+.acc-profile-card.has-cover .acc-avatar-wrap { margin-top: -40px; }
+.acc-tag-chip {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-muted);
+    margin-inline-start: 8px;
+}
+.acc-pinned-note {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: var(--glass-bg);
+    border: 1px dashed var(--glass-border);
+    font-size: 0.8rem;
+    color: var(--text-main);
+    margin: 8px 0;
+}
+
+/* ── اكتشف حسابات ── */
+.acc-discover-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+.acc-discover-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 14px 10px;
+    border-radius: 12px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    text-decoration: none;
+    text-align: center;
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+.acc-discover-card:hover { transform: translateY(-2px); background: var(--glass-strong); }
+.acc-discover-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--primary);
+    color: #000;
+    font-weight: 800;
+    overflow: hidden;
+}
+.acc-discover-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.acc-discover-card strong { color: var(--text-main); font-size: 0.8rem; }
+.acc-discover-card span { color: var(--text-muted); font-size: 0.7rem; }
+
+/* ── ستوريز ── */
+.acc-stories-bar {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    padding: 6px 4px 14px;
+    margin-bottom: 6px;
+}
+.acc-story-add, .acc-story-circle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    width: 64px;
+}
+.acc-story-add-icon {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: 2px dashed var(--glass-border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+    color: var(--primary);
+}
+.acc-story-ring {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: 2px solid var(--primary);
+    padding: 2px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--primary);
+    color: #000;
+    font-weight: 800;
+    overflow: hidden;
+}
+.acc-story-ring img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.acc-story-circle span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60px; }
+
+/* ── مشاهدة الستوري ── */
+.acc-story-viewer {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.acc-story-viewer[hidden] { display: none; }
+.acc-story-viewer-bar { position: absolute; top: 12px; left: 12px; right: 12px; height: 3px; border-radius: 999px; background: rgba(255,255,255,0.25); }
+.acc-story-viewer-progress { height: 100%; background: #fff; border-radius: 999px; transition: width 0.2s ease; }
+.acc-story-viewer-close {
+    position: absolute;
+    top: 20px; inset-inline-end: 20px;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+}
+.acc-story-viewer-content { max-width: 420px; max-height: 80vh; text-align: center; color: #fff; padding: 20px; }
+.acc-story-viewer-content img { max-width: 100%; max-height: 80vh; border-radius: 12px; }
+.acc-story-viewer-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+.acc-story-viewer-prev { inset-inline-start: 16px; }
+.acc-story-viewer-next { inset-inline-end: 16px; }
+
+.acc-avatar-wrap.has-story { cursor: pointer; }
+.acc-avatar-wrap.has-story .acc-avatar {
+    box-shadow: 0 0 0 3px var(--bg-base), 0 0 0 5px var(--primary);
+}
+

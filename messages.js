@@ -148,16 +148,58 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const res = await AccountAPI.getThread(activeUsername);
             const msgs = res.data || [];
-            el.innerHTML = msgs.map((m) => {
-                const isMine = activeUsername === 'admin'
-                    ? !m.isAdminReply
-                    : String(m.fromUser) === String(myId);
-                return `<div class="msg-bubble ${isMine ? 'is-mine' : 'is-theirs'} msg-bubble-in">${renderBubbleContent(m)}</div>`;
-            }).join('') || '<p class="acc-empty">لسه مفيش رسايل، ابدأ الكلام 👋</p>';
+            lastMessagesCache = msgs;
+            el.innerHTML = msgs.map((m) => renderBubble(m)).join('') || '<p class="acc-empty">لسه مفيش رسايل، ابدأ الكلام 👋</p>';
             el.scrollTop = el.scrollHeight;
         } catch (err) {
             el.innerHTML = `<p class="acc-empty">${escapeHtml(err.message)}</p>`;
         }
+    }
+
+    let lastMessagesCache = [];
+
+    function renderBubble(m) {
+        const isMine = activeUsername === 'admin'
+            ? !m.isAdminReply
+            : String(m.fromUser) === String(myId);
+        const reactionsHtml = (m.reactions || []).length
+            ? `<div class="msg-bubble-reactions">${m.reactions.map((r) => `<span>${r.emoji}</span>`).join('')}</div>`
+            : '';
+        // ✅ (Seen) بيظهر بس على آخر رسالة مني لو الطرف التاني قراها
+        const seenTick = isMine ? `<span class="msg-seen-tick">${m.readByRecipient ? '✔✔' : '✔'}</span>` : '';
+        return `<div class="msg-bubble ${isMine ? 'is-mine' : 'is-theirs'} msg-bubble-in" data-id="${m._id}">
+            ${renderBubbleContent(m)}
+            <div class="msg-bubble-footer">${seenTick}</div>
+            ${reactionsHtml}
+        </div>`;
+    }
+
+    // ── ريأكشنز — دبل كليك على الرسالة يفتح شريط إيموجي صغير ──
+    const REACTION_EMOJIS = ['❤️', '🔥', '😂', '👍', '😮', '😢'];
+    document.getElementById('msgThreadMessages').addEventListener('dblclick', (e) => {
+        const bubble = e.target.closest('.msg-bubble');
+        if (!bubble) return;
+        showReactionPicker(bubble);
+    });
+
+    function showReactionPicker(bubble) {
+        document.querySelector('.msg-reaction-picker')?.remove();
+        const picker = document.createElement('div');
+        picker.className = 'msg-reaction-picker';
+        picker.innerHTML = REACTION_EMOJIS.map((e) => `<button type="button" data-emoji="${e}">${e}</button>`).join('');
+        bubble.appendChild(picker);
+        picker.addEventListener('click', async (e) => {
+            const btn = e.target.closest('[data-emoji]');
+            if (!btn) return;
+            try {
+                await AccountAPI.reactToMessage(bubble.dataset.id, btn.dataset.emoji);
+                await loadMessages();
+            } catch (err) { window.TojiAccount.toast(err.message); }
+            picker.remove();
+        });
+        setTimeout(() => document.addEventListener('click', function onOutside(ev) {
+            if (!picker.contains(ev.target)) { picker.remove(); document.removeEventListener('click', onOutside); }
+        }), 10);
     }
 
     function renderBubbleContent(m) {
@@ -276,6 +318,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('msgRecordingCancel')?.addEventListener('click', () => stopRecording(false));
     document.getElementById('msgRecordingSend')?.addEventListener('click', () => stopRecording(true));
 
+    // ── مؤشر "بيكتب..." ──
+    let typingSendTimer = null;
+    document.getElementById('msgThreadInput')?.addEventListener('input', () => {
+        if (!activeUsername || activeUsername === 'admin') return;
+        clearTimeout(typingSendTimer);
+        typingSendTimer = setTimeout(() => AccountAPI.setTyping(activeUsername).catch(() => {}), 300);
+    });
+
+    async function checkTyping() {
+        if (!activeUsername || activeUsername === 'admin') return;
+        try {
+            const res = await AccountAPI.getTyping(activeUsername);
+            document.getElementById('msgTypingIndicator')?.remove();
+            if (res.isTyping) {
+                const el = document.getElementById('msgThreadMessages');
+                const indicator = document.createElement('div');
+                indicator.id = 'msgTypingIndicator';
+                indicator.className = 'msg-bubble is-theirs msg-typing-bubble';
+                indicator.innerHTML = '<span></span><span></span><span></span>';
+                el.appendChild(indicator);
+                el.scrollTop = el.scrollHeight;
+            }
+        } catch {}
+    }
+
     await loadThreads();
     if (activeUsername) {
         const existing = threadsCache.find((t) => (t.isAdmin ? 'admin' : t.other?.username) === activeUsername);
@@ -286,4 +353,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ── تحديث دوري خفيف لقائمة المحادثات (بديل بسيط لـ real-time) ──
     setInterval(() => { loadThreads(); if (activeUsername) loadMessages(); }, 15000);
+    setInterval(checkTyping, 3000);
 });

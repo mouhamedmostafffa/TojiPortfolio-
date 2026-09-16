@@ -7,7 +7,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https:; frame-src 'self'; connect-src 'self' https://portfolio-backend-production-604c.up.railway.app http://localhost:5000; object-src 'none'; base-uri 'self'; frame-ancestors 'none';">
     <title>الحسابات | TOJI Admin</title>
     <link rel="stylesheet" href="admin.css?v=22">
-    <link rel="stylesheet" href="admin-accounts.css?v=4">
+    <link rel="stylesheet" href="admin-accounts.css?v=5">
 </head>
 <body>
     <main class="admin-shell">
@@ -82,10 +82,36 @@
                 <div class="panel-body">
                     <div class="acc-broadcast-composer">
                         <textarea id="broadcastText" rows="2" placeholder="اكتب إعلان يظهر لكل المسجلين... (خصم العيد، تحديث جديد...)" maxlength="500"></textarea>
+                        <div class="acc-broadcast-schedule">
+                            <label for="broadcastSchedule">جدولة (اختياري)</label>
+                            <input type="datetime-local" id="broadcastSchedule">
+                        </div>
                         <button type="button" class="btn-primary" id="broadcastSendBtn">نشر الإعلان</button>
                     </div>
                     <span class="acc-form-msg" id="broadcastMsg"></span>
                     <div id="broadcastList" class="acc-broadcast-list"></div>
+                </div>
+            </details>
+
+            <!-- ── ردود جاهزة ── -->
+            <details class="panel" id="templatesPanel">
+                <summary>📋 ردود جاهزة</summary>
+                <div class="panel-body">
+                    <div class="projects-toolbar">
+                        <button id="templatesLoadBtn" type="button" class="btn-secondary">🔄 تحديث</button>
+                        <button id="templatesAddBtn" type="button" class="btn-primary"><span>+</span> رد جديد</button>
+                    </div>
+                    <div class="project-form" id="templatesForm" hidden>
+                        <h3 id="templatesFormTitle">رد جديد</h3>
+                        <input type="hidden" id="templatesFormId">
+                        <div class="project-form-grid" id="templatesFields"></div>
+                        <div class="project-form-actions">
+                            <button id="templatesSaveBtn" type="button" class="btn-primary">💾 حفظ</button>
+                            <button id="templatesCancelBtn" type="button" class="btn-ghost">إلغاء</button>
+                        </div>
+                        <p id="templatesFormMsg" class="form-msg"></p>
+                    </div>
+                    <div id="templatesList"><p class="projects-hint">اضغط "تحديث" لعرض الردود الجاهزة.</p></div>
                 </div>
             </details>
 
@@ -233,7 +259,7 @@
     </main>
 
     <script src="api.js?v=23"></script>
-    <script src="admin-accounts.js?v=4"></script>
-    <script src="admin-content.js?v=3"></script>
+    <script src="admin-accounts.js?v=5"></script>
+    <script src="admin-content.js?v=4"></script>
 </body>
 </html>

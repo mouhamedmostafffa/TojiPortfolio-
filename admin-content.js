@@ -121,6 +121,16 @@
                 { id: 'enabled', label: 'مفعّل', type: 'checkbox', default: true }
             ],
             renderItem: (it) => ({ title: `${it.emoji || '🏆'} ${it.label}`, sub: it.key, visible: it.enabled })
+        },
+        templates: {
+            api: () => window.TojiAPI.ReplyTemplateAPI,
+            title: 'رد جاهز جديد',
+            fields: [
+                { id: 'title', label: 'اسم الرد (يظهر لك بس)', type: 'text', placeholder: 'أهلًا وسهلًا' },
+                { id: 'text', label: 'نص الرد', type: 'textarea' },
+                { id: 'order', label: 'الترتيب', type: 'number', default: 0 }
+            ],
+            renderItem: (it) => ({ title: it.title, sub: (it.text || '').slice(0, 60) })
         }
     };
 

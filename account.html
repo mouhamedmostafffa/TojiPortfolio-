@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="style.css?v=22">
     <link rel="stylesheet" href="enhancements.css?v=9">
     <link rel="stylesheet" href="pages.css?v=6">
-    <link rel="stylesheet" href="account.css?v=7">
+    <link rel="stylesheet" href="account.css?v=8">
 </head>
 <body class="dark-theme is-loading preset-graphite">
     <div class="mesh-bg" aria-hidden="true"></div>
@@ -53,7 +53,8 @@
             <!-- ── محتوى الحساب ── -->
             <div id="accDashboard" hidden>
 
-                <div class="acc-profile-card glass-card ig-style">
+                <div class="acc-profile-card glass-card ig-style" id="accProfileCard">
+                    <div class="acc-profile-cover" id="accProfileCover" hidden></div>
                     <div class="acc-avatar-wrap">
                         <img class="acc-avatar" id="accAvatarImg" src="" alt="" hidden>
                         <span class="acc-avatar acc-avatar-fallback" id="accAvatarFallback"></span>
@@ -65,6 +66,7 @@
                     <div class="acc-profile-info">
                         <div class="acc-ig-top-row">
                             <h3 id="accName">—</h3>
+                            <span class="acc-tag-chip" id="accTagChip" hidden></span>
                             <div class="acc-ig-stats">
                                 <div class="acc-ig-stat"><strong id="accPointsTotal">0</strong><span>نقطة</span></div>
                                 <a class="acc-ig-stat" href="#" id="accFollowersLink"><strong id="accFollowersCount">0</strong><span>متابِع</span></a>
@@ -75,6 +77,7 @@
                         <p id="accEmail">—</p>
                         <p class="acc-bio" id="accBioDisplay"></p>
                         <div class="acc-badges-row" id="accBadgesRow"></div>
+                        <p class="acc-pinned-note" id="accPinnedNote" hidden></p>
                         <div class="acc-ig-actions">
                             <a class="btn-secondary" href="settings.html"><i data-lucide="settings" aria-hidden="true"></i> إعدادات الحساب</a>
                             <a class="btn-secondary" href="messages.html"><i data-lucide="message-circle" aria-hidden="true"></i> الرسايل</a>
@@ -98,6 +101,16 @@
 
                 <!-- 📢 إعلانات الأدمن -->
                 <div class="acc-broadcast-banner" id="accBroadcastBanner" hidden></div>
+
+                <!-- ستوريز — تختفي بعد 24 ساعة -->
+                <div class="acc-stories-bar" id="accStoriesBar">
+                    <label class="acc-story-add">
+                        <input type="file" id="storyImageInput" accept="image/png,image/jpeg,image/webp" hidden>
+                        <span class="acc-story-add-icon">+</span>
+                        <span>ستوري جديدة</span>
+                    </label>
+                    <div id="storiesFeedList" class="acc-stories-list"></div>
+                </div>
 
                 <div class="acc-grid">
                     <!-- النقط والخصومات -->
@@ -131,6 +144,19 @@
                         </div>
                         <div id="accFollowersList" class="acc-list"></div>
                         <div id="accFollowingList" class="acc-list" hidden></div>
+                    </div>
+
+                    <!-- ترتيبك ومقارنة نشاطك -->
+                    <div class="glass-card acc-panel acc-panel-wide">
+                        <h4><i data-lucide="trophy" aria-hidden="true"></i> الترتيب</h4>
+                        <p class="acc-points-hint" id="accPercentileText">جارٍ الحساب...</p>
+                        <div id="leaderboardList" class="acc-list"></div>
+                    </div>
+
+                    <!-- اكتشف حسابات -->
+                    <div class="glass-card acc-panel acc-panel-wide">
+                        <h4><i data-lucide="compass" aria-hidden="true"></i> اكتشف حسابات</h4>
+                        <div id="discoverList" class="acc-discover-grid"></div>
                     </div>
 
                     <!-- تحدي الأسبوع + صندوق المفاجآت -->
@@ -225,11 +251,18 @@
             </div>
         </section>
     </main>
+    <div class="acc-story-viewer" id="storyViewer" hidden>
+        <div class="acc-story-viewer-bar"><div class="acc-story-viewer-progress" id="storyProgress"></div></div>
+        <button type="button" class="acc-story-viewer-close" id="storyViewerClose">✕</button>
+        <div class="acc-story-viewer-content" id="storyViewerContent"></div>
+        <button type="button" class="acc-story-viewer-nav acc-story-viewer-prev" id="storyPrevBtn">‹</button>
+        <button type="button" class="acc-story-viewer-nav acc-story-viewer-next" id="storyNextBtn">›</button>
+    </div>
     <footer class="owner-credit" data-owner-credit=""><span>Website created by:</span><a href="https://www.instagram.com/mouhamedmostafffa" target="_blank" rel="noopener noreferrer">@mouhamedmostafffa</a><span class="owner-copyright">© 2026 Mohamed Mostafa. All rights reserved.</span></footer>
     <script src="vendor/lucide.min.js?v=18"></script>
     <script src="api.js?v=23"></script>
     <script src="pages-shell.js?v=1"></script>
-    <script src="account.js?v=8"></script>
+    <script src="account.js?v=9"></script>
     <script src="dashboard.js?v=6"></script>
 </body>
 </html>

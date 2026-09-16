@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="style.css?v=22">
     <link rel="stylesheet" href="enhancements.css?v=9">
     <link rel="stylesheet" href="pages.css?v=6">
-    <link rel="stylesheet" href="account.css?v=7">
+    <link rel="stylesheet" href="account.css?v=8">
 </head>
 <body class="dark-theme is-loading preset-graphite">
     <div class="mesh-bg" aria-hidden="true"></div>
@@ -120,6 +120,47 @@
                         <label class="acc-checkbox"><input type="checkbox" data-pref="follows"> تنبيه متابعة جديدة</label>
                     </div>
                     <p class="form-status" id="notifyPrefsStatus"></p>
+                    <hr>
+                    <p class="acc-points-hint">فعّل تنبيهات المتصفح عشان توصلك رسالة/متابعة جديدة حتى وانت مقفل التاب.</p>
+                    <button class="btn-secondary" id="pushEnableBtn" type="button">🔔 فعّل تنبيهات المتصفح</button>
+                    <p class="form-status" id="pushStatus"></p>
+                </div>
+
+                <!-- تخصيص البروفايل -->
+                <div class="glass-card acc-panel acc-panel-wide">
+                    <h4><i data-lucide="palette" aria-hidden="true"></i> تخصيص البروفايل</h4>
+                    <p class="acc-points-hint">غلاف، لون مميز، وتصنيف بيظهروا في بروفايلك العام.</p>
+
+                    <label class="acc-points-hint" style="display:block;margin-bottom:6px;">صورة الغلاف</label>
+                    <div class="acc-cover-preview" id="coverPreview">
+                        <img id="coverPreviewImg" src="" alt="" hidden>
+                        <label class="btn-secondary acc-cover-upload-btn">
+                            <input type="file" id="coverInput" accept="image/png,image/jpeg,image/webp" hidden>
+                            📷 ارفع غلاف
+                        </label>
+                    </div>
+
+                    <div class="acc-center-row" style="margin-top:14px;">
+                        <label>لونك المميز
+                            <input type="color" id="accentColorInput" value="#632626">
+                        </label>
+                        <label>تصنيف حسابك
+                            <select id="accountTagSelect">
+                                <option value="">من غير تصنيف</option>
+                                <option value="developer">مطور</option>
+                                <option value="designer">مصمم</option>
+                                <option value="client">عميل</option>
+                                <option value="other">تاني</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <label>ملاحظة مثبّتة فوق بروفايلك (اختياري)
+                        <input type="text" id="pinnedNoteInput" maxlength="200" placeholder="مثلاً: متاح للشغل دلوقتي 🚀">
+                    </label>
+
+                    <button class="btn-secondary" id="customizeSaveBtn" type="button">حفظ التخصيص</button>
+                    <p class="form-status" id="customizeStatus"></p>
                 </div>
 
                 <!-- أغانيّ المفضلة -->
@@ -208,7 +249,7 @@
     <script src="vendor/lucide.min.js?v=18"></script>
     <script src="api.js?v=23"></script>
     <script src="pages-shell.js?v=1"></script>
-    <script src="account.js?v=8"></script>
-    <script src="settings.js?v=2"></script>
+    <script src="account.js?v=9"></script>
+    <script src="settings.js?v=3"></script>
 </body>
 </html>

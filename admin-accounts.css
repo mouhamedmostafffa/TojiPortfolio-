@@ -185,3 +185,29 @@
     .acc-inbox-layout { grid-template-columns: 1fr; }
     .acc-inbox-list { max-height: 200px; }
 }
+
+/* ── جدولة الإعلانات + قوالب الردود الجاهزة ── */
+.acc-broadcast-schedule { display: flex; flex-direction: column; gap: 4px; }
+.acc-broadcast-schedule label { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
+.acc-broadcast-schedule input {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--panel-solid);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.8rem;
+}
+.acc-broadcast-scheduled { display: block; margin-top: 6px; font-size: 0.72rem; color: var(--warn); }
+
+.acc-inbox-templates { margin-bottom: 6px; }
+.acc-inbox-template-select {
+    padding: 9px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--panel-solid);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.78rem;
+    max-width: 140px;
+}

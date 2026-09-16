@@ -308,14 +308,18 @@
             const res = await adminFetch('/admin/users/broadcast');
             const items = res.data || [];
             if (!items.length) { listEl.innerHTML = '<p class="projects-hint">لسه مفيش إعلانات.</p>'; return; }
-            listEl.innerHTML = items.map((b) => `
+            listEl.innerHTML = items.map((b) => {
+                const isFuture = b.scheduledFor && new Date(b.scheduledFor) > new Date();
+                const scheduleLabel = isFuture ? `<span class="acc-broadcast-scheduled">⏰ مجدول لـ ${new Date(b.scheduledFor).toLocaleString('ar-EG')}</span>` : '';
+                return `
                 <div class="acc-broadcast-item ${b.active ? '' : 'is-inactive'}" data-id="${b._id}">
-                    <p>${escapeAttr(b.text)}</p>
+                    <p>${escapeAttr(b.text)}${scheduleLabel}</p>
                     <div class="acc-broadcast-item-actions">
                         <button type="button" data-act="toggle">${b.active ? '⏸ إيقاف' : '▶️ تفعيل'}</button>
                         <button type="button" data-act="delete">🗑 حذف</button>
                     </div>
-                </div>`).join('');
+                </div>`;
+            }).join('');
         } catch (err) {
             listEl.innerHTML = `<p class="projects-hint is-error">${err.message}</p>`;
         }
@@ -334,9 +338,11 @@
         msg.textContent = 'جارٍ النشر...';
         msg.className = 'acc-form-msg';
         try {
-            await adminFetch('/admin/users/broadcast', { method: 'POST', body: JSON.stringify({ text }) });
+            const scheduledFor = $('broadcastSchedule').value ? new Date($('broadcastSchedule').value).toISOString() : null;
+            await adminFetch('/admin/users/broadcast', { method: 'POST', body: JSON.stringify({ text, scheduledFor }) });
             $('broadcastText').value = '';
-            msg.textContent = 'اتنشر ✅';
+            $('broadcastSchedule').value = '';
+            msg.textContent = scheduledFor ? 'اتجدول ✅' : 'اتنشر ✅';
             msg.className = 'acc-form-msg is-success';
             loadBroadcasts();
         } catch (err) {
@@ -412,17 +418,47 @@
                 <div class="acc-inbox-msgs">${msgs.map((m) => `
                     <div class="acc-inbox-msg ${m.isAdminReply ? 'from-admin' : 'from-user'}">${escapeAttr(m.text)}</div>
                 `).join('')}</div>
+                <div class="acc-inbox-templates" id="inboxTemplatesRow"></div>
                 <div class="acc-inbox-reply-row">
+                    <select id="inboxTemplateSelect" class="acc-inbox-template-select">
+                        <option value="">📋 رد جاهز...</option>
+                    </select>
                     <input type="text" id="inboxReplyInput" placeholder="اكتب رد...">
                     <button type="button" id="inboxReplyBtn" class="btn-primary">إرسال</button>
                 </div>`;
             $('inboxReplyBtn').addEventListener('click', () => sendInboxReply(userId));
             $('inboxReplyInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendInboxReply(userId); });
             el.querySelector('.acc-inbox-msgs')?.scrollTo(0, 99999);
+            loadTemplatesIntoSelect();
         } catch (err) {
             el.innerHTML = `<p class="projects-hint is-error">${err.message}</p>`;
         }
     }
+
+    let templatesCache = null;
+    async function loadTemplatesIntoSelect() {
+        const select = $('inboxTemplateSelect');
+        if (!select) return;
+        try {
+            if (!templatesCache) {
+                const res = await window.TojiAPI.ReplyTemplateAPI.getAll();
+                templatesCache = res.data || [];
+            }
+            templatesCache.forEach((t) => {
+                const opt = document.createElement('option');
+                opt.value = t.text;
+                opt.textContent = t.title;
+                select.appendChild(opt);
+            });
+        } catch {}
+    }
+    document.addEventListener('change', (e) => {
+        if (e.target.id === 'inboxTemplateSelect' && e.target.value) {
+            $('inboxReplyInput').value = e.target.value;
+            e.target.value = '';
+            $('inboxReplyInput').focus();
+        }
+    });
 
     async function sendInboxReply(userId) {
         const input = $('inboxReplyInput');

@@ -3,7 +3,7 @@
 // ✅ Network-First for HTML/JS (يجيب من الشبكة أول)
 //    Cache-First for assets only (صور، icons)
 // ============================================================
-const CACHE_NAME = 'toji-site-v39';
+const CACHE_NAME = 'toji-site-v40';
 
 // فقط الأصول الثابتة اللي بتتكاش (مش HTML أو JS)
 const STATIC_ASSETS = [
@@ -72,5 +72,32 @@ self.addEventListener('fetch', (event) => {
                 return response;
             })
             .catch(() => caches.match(request))
+    );
+});
+
+// ==================== Web Push — تنبيهات المتصفح ====================
+self.addEventListener('push', (event) => {
+    let data = { title: 'TOJI', body: 'عندك تنبيه جديد', url: '/' };
+    try { data = { ...data, ...event.data.json() }; } catch {}
+    event.waitUntil(
+        self.registration.showNotification(data.title, {
+            body: data.body,
+            icon: './assets/icon-192.png',
+            badge: './assets/icon-192.png',
+            data: { url: data.url || '/' }
+        })
+    );
+});
+
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    const url = event.notification.data?.url || '/';
+    event.waitUntil(
+        clients.matchAll({ type: 'window' }).then((clientsList) => {
+            for (const client of clientsList) {
+                if (client.url.includes(url) && 'focus' in client) return client.focus();
+            }
+            if (clients.openWindow) return clients.openWindow(url);
+        })
     );
 });

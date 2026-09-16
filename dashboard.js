@@ -50,6 +50,37 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadBroadcasts();
         renderBadges(user.badgeKeys || []);
 
+        // غلاف + تصنيف + تثبيت
+        const coverEl = document.getElementById('accProfileCover');
+        const cardEl  = document.getElementById('accProfileCard');
+        if (user.coverImageUrl) {
+            coverEl.style.backgroundImage = `url(${user.coverImageUrl})`;
+            coverEl.hidden = false;
+            cardEl.classList.add('has-cover');
+        } else {
+            coverEl.hidden = true;
+            cardEl.classList.remove('has-cover');
+        }
+        const tagLabels = { developer: '👨‍💻 مطور', designer: '🎨 مصمم', client: '🤝 عميل', other: '✨ تاني' };
+        const tagChip = document.getElementById('accTagChip');
+        if (user.accountTag && tagLabels[user.accountTag]) {
+            tagChip.textContent = tagLabels[user.accountTag];
+            tagChip.hidden = false;
+        } else {
+            tagChip.hidden = true;
+        }
+        const pinnedEl = document.getElementById('accPinnedNote');
+        if (user.pinnedItem?.note) {
+            pinnedEl.textContent = `📌 ${user.pinnedItem.note}`;
+            pinnedEl.hidden = false;
+        } else {
+            pinnedEl.hidden = true;
+        }
+
+        loadLeaderboardAndPercentile();
+        loadDiscover();
+        loadStoriesFeed();
+
         const img = document.getElementById('accAvatarImg');
         const fallback = document.getElementById('accAvatarFallback');
         if (user.avatarUrl) {
@@ -188,6 +219,107 @@ document.addEventListener('DOMContentLoaded', async () => {
             this.disabled = false;
         }
     });
+
+    // ── الترتيب (Leaderboard) + مقارنة نشاطك ──
+    async function loadLeaderboardAndPercentile() {
+        try {
+            const [lb, pct] = await Promise.all([AccountAPI.getLeaderboard(), AccountAPI.getPercentile()]);
+            const list = lb.data || [];
+            document.getElementById('leaderboardList').innerHTML = list.map((u, i) => `
+                <div class="acc-list-item">
+                    <div><strong>${i + 1}. ${escapeHtml(u.name)}</strong><span>@${escapeHtml(u.username)}</span></div>
+                    <div class="acc-list-meta"><small>${u.points} نقطة</small></div>
+                </div>`).join('') || '<p class="acc-empty">لسه مفيش بيانات كفاية.</p>';
+            const rankText = lb.myRank ? ` — ترتيبك: #${lb.myRank}` : '';
+            document.getElementById('accPercentileText').textContent =
+                `انت أنشط من ${pct.percentile}% من المستخدمين${rankText}`;
+        } catch {
+            document.getElementById('accPercentileText').textContent = 'تعذر تحميل الترتيب.';
+        }
+    }
+
+    // ── اكتشف حسابات ──
+    async function loadDiscover() {
+        const el = document.getElementById('discoverList');
+        try {
+            const res = await AccountAPI.discover();
+            const users = res.data || [];
+            if (!users.length) { el.innerHTML = '<p class="acc-empty">مفيش اقتراحات دلوقتي.</p>'; return; }
+            el.innerHTML = users.map((u) => `
+                <a class="acc-discover-card" href="profile.html?u=${encodeURIComponent(u.username)}">
+                    <span class="acc-discover-avatar">${(u.avatarUrl ? `<img src="${u.avatarUrl}" alt="">` : (u.name || '؟').slice(0, 1).toUpperCase())}</span>
+                    <strong>${escapeHtml(u.name)}</strong>
+                    <span>@${escapeHtml(u.username)}</span>
+                </a>`).join('');
+        } catch {
+            el.innerHTML = '<p class="acc-empty">تعذر تحميل الاقتراحات.</p>';
+        }
+    }
+
+    // ── ستوريز ──
+    let activeStories = [];
+    let activeStoryIndex = 0;
+
+    async function loadStoriesFeed() {
+        const el = document.getElementById('storiesFeedList');
+        try {
+            const res = await AccountAPI.getStoriesFeed();
+            const stories = res.data || [];
+            // تجميع الستوريز حسب صاحبها
+            const byUser = new Map();
+            stories.forEach((s) => {
+                const uid = s.userId?._id || s.userId;
+                if (!byUser.has(uid)) byUser.set(uid, { user: s.userId, items: [] });
+                byUser.get(uid).items.push(s);
+            });
+            el.innerHTML = Array.from(byUser.values()).map((g) => `
+                <button type="button" class="acc-story-circle" data-user-id="${g.user?._id || ''}">
+                    <span class="acc-story-ring">${g.user?.avatarUrl ? `<img src="${g.user.avatarUrl}" alt="">` : (g.user?.name || '؟').slice(0, 1).toUpperCase()}</span>
+                    <span>${escapeHtml(g.user?.name || '')}</span>
+                </button>`).join('');
+            el.dataset.groups = JSON.stringify(Array.from(byUser.values()).map((g) => g.items.map((i) => i._id)));
+            window._storyGroups = Array.from(byUser.values());
+        } catch {
+            el.innerHTML = '';
+        }
+    }
+
+    document.getElementById('storyImageInput')?.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        e.target.value = '';
+        if (!file) return;
+        try {
+            const res = await AccountAPI.uploadStoryImage(file);
+            await AccountAPI.addStory('', res.url);
+            window.TojiAccount.toast('اتنشرت الستوري! 📸 (هتفضل 24 ساعة)');
+            loadStoriesFeed();
+        } catch (err) { window.TojiAccount.toast(err.message); }
+    });
+
+    document.getElementById('storiesFeedList')?.addEventListener('click', (e) => {
+        const btn = e.target.closest('.acc-story-circle');
+        if (!btn) return;
+        const group = (window._storyGroups || []).find((g) => (g.user?._id || '') === btn.dataset.userId);
+        if (!group) return;
+        activeStories = group.items;
+        activeStoryIndex = 0;
+        openStoryViewer();
+    });
+
+    function openStoryViewer() {
+        const story = activeStories[activeStoryIndex];
+        if (!story) { closeStoryViewer(); return; }
+        document.getElementById('storyViewer').hidden = false;
+        document.getElementById('storyViewerContent').innerHTML = story.imageUrl
+            ? `<img src="${story.imageUrl}" alt="">`
+            : `<p>${escapeHtml(story.text || '')}</p>`;
+        document.getElementById('storyProgress').style.width = `${((activeStoryIndex + 1) / activeStories.length) * 100}%`;
+        AccountAPI.viewStory(story._id).catch(() => {});
+    }
+    function closeStoryViewer() { document.getElementById('storyViewer').hidden = true; }
+    document.getElementById('storyViewerClose')?.addEventListener('click', closeStoryViewer);
+    document.getElementById('storyNextBtn')?.addEventListener('click', () => { activeStoryIndex++; openStoryViewer(); });
+    document.getElementById('storyPrevBtn')?.addEventListener('click', () => { activeStoryIndex = Math.max(0, activeStoryIndex - 1); openStoryViewer(); });
 
     document.getElementById('accReferralCopyBtn')?.addEventListener('click', () => {
         const code = document.getElementById('accReferralCode').textContent;

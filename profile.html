@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="style.css?v=22">
     <link rel="stylesheet" href="enhancements.css?v=9">
     <link rel="stylesheet" href="pages.css?v=6">
-    <link rel="stylesheet" href="account.css?v=7">
+    <link rel="stylesheet" href="account.css?v=8">
 </head>
 <body class="dark-theme is-loading preset-graphite">
     <div class="mesh-bg" aria-hidden="true"></div>
@@ -55,14 +55,16 @@
 
             <!-- ── البروفايل ── -->
             <div id="profileContent" hidden class="acc-settings-wrap">
-                <div class="acc-profile-card glass-card ig-style">
-                    <div class="acc-avatar-wrap">
+                <div class="acc-profile-card glass-card ig-style" id="pProfileCard">
+                    <div class="acc-profile-cover" id="pProfileCover" hidden></div>
+                    <div class="acc-avatar-wrap" id="pAvatarWrap">
                         <img class="acc-avatar" id="pAvatarImg" src="" alt="" hidden>
                         <span class="acc-avatar acc-avatar-fallback" id="pAvatarFallback"></span>
                     </div>
                     <div class="acc-profile-info">
                         <div class="acc-ig-top-row">
                             <h3 id="pName">—</h3>
+                            <span class="acc-tag-chip" id="pTagChip" hidden></span>
                             <div class="acc-ig-stats">
                                 <div class="acc-ig-stat" id="pPointsStat" hidden><strong id="pPointsTotal">0</strong><span>نقطة</span></div>
                                 <div class="acc-ig-stat"><strong id="pFollowersCount">0</strong><span>متابِع</span></div>
@@ -72,6 +74,7 @@
                         <p id="pUsername">@—</p>
                         <p class="acc-bio" id="pBio"></p>
                         <div class="acc-badges-row" id="pBadgesRow"></div>
+                        <p class="acc-pinned-note" id="pPinnedNote" hidden></p>
                         <p class="acc-points-hint" id="pMemberSince"></p>
                         <div class="acc-ig-actions">
                             <button type="button" class="toji-auth-submit" id="pFollowBtn">تابعه</button>
@@ -98,11 +101,18 @@
             </div>
         </section>
     </main>
+    <div class="acc-story-viewer" id="storyViewer" hidden>
+        <div class="acc-story-viewer-bar"><div class="acc-story-viewer-progress" id="storyProgress"></div></div>
+        <button type="button" class="acc-story-viewer-close" id="storyViewerClose">✕</button>
+        <div class="acc-story-viewer-content" id="storyViewerContent"></div>
+        <button type="button" class="acc-story-viewer-nav acc-story-viewer-prev" id="storyPrevBtn">‹</button>
+        <button type="button" class="acc-story-viewer-nav acc-story-viewer-next" id="storyNextBtn">›</button>
+    </div>
     <footer class="owner-credit" data-owner-credit=""><span>Website created by:</span><a href="https://www.instagram.com/mouhamedmostafffa" target="_blank" rel="noopener noreferrer">@mouhamedmostafffa</a><span class="owner-copyright">© 2026 Mohamed Mostafa. All rights reserved.</span></footer>
     <script src="vendor/lucide.min.js?v=18"></script>
     <script src="api.js?v=23"></script>
     <script src="pages-shell.js?v=1"></script>
-    <script src="account.js?v=8"></script>
-    <script src="profile.js?v=2"></script>
+    <script src="account.js?v=9"></script>
+    <script src="profile.js?v=3"></script>
 </body>
 </html>

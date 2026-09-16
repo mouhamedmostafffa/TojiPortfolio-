@@ -7,7 +7,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const contentEl = document.getElementById('profileContent');
 
     const AccountAPI = window.TojiAccount?.AccountAPI;
-    const username = new URLSearchParams(window.location.search).get('u');
+    // ✅ اليوزرنيم ممكن ييجي من ?u=username (لينك مباشر) أو من /account/username
+    //    (اللينك الجميل عن طريق vercel rewrite — بيوصل السيرفر بس مش بيتحدث في
+    //    window.location على المتصفح، فلازم نستخرجه من الـ path كمان)
+    function getUsernameFromUrl() {
+        const fromQuery = new URLSearchParams(window.location.search).get('u');
+        if (fromQuery) return fromQuery;
+        const match = window.location.pathname.match(/\/account\/([^/?#]+)/i);
+        return match ? decodeURIComponent(match[1]) : null;
+    }
+    const username = getUsernameFromUrl();
 
     if (!username || !AccountAPI) {
         loadingEl.hidden = true;
@@ -55,6 +64,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('pFollowersCount').textContent = profile.followersCount || 0;
         document.getElementById('pFollowingCount').textContent = profile.followingCount || 0;
         document.getElementById('pMemberSince').textContent = profile.memberSince ? `عضو من ${formatDate(profile.memberSince)}` : '';
+
+        const coverEl = document.getElementById('pProfileCover');
+        const cardEl  = document.getElementById('pProfileCard');
+        if (profile.coverImageUrl) {
+            coverEl.style.backgroundImage = `url(${profile.coverImageUrl})`;
+            coverEl.hidden = false;
+            cardEl.classList.add('has-cover');
+        } else {
+            coverEl.hidden = true;
+            cardEl.classList.remove('has-cover');
+        }
+        const tagLabels = { developer: '👨‍💻 مطور', designer: '🎨 مصمم', client: '🤝 عميل', other: '✨ تاني' };
+        const tagChip = document.getElementById('pTagChip');
+        if (profile.accountTag && tagLabels[profile.accountTag]) {
+            tagChip.textContent = tagLabels[profile.accountTag];
+            tagChip.hidden = false;
+        } else {
+            tagChip.hidden = true;
+        }
+        const pinnedEl = document.getElementById('pPinnedNote');
+        if (profile.pinnedItem?.note) {
+            pinnedEl.textContent = `📌 ${profile.pinnedItem.note}`;
+            pinnedEl.hidden = false;
+        } else {
+            pinnedEl.hidden = true;
+        }
+
+        renderStories(profile.username);
 
         const pointsStat = document.getElementById('pPointsStat');
         if (profile.points) {
@@ -175,6 +212,39 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         window.location.href = `messages.html?u=${encodeURIComponent(username)}`;
     });
+
+    // ── ستوريز صاحب البروفايل ──
+    let activeStories = [];
+    let activeStoryIndex = 0;
+
+    async function renderStories(uname) {
+        try {
+            const res = await AccountAPI.getStories(uname);
+            activeStories = res.data || [];
+            document.getElementById('pAvatarWrap')?.classList.toggle('has-story', activeStories.length > 0);
+        } catch { activeStories = []; }
+    }
+
+    document.getElementById('pAvatarWrap')?.addEventListener('click', () => {
+        if (!activeStories.length) return;
+        activeStoryIndex = 0;
+        openStoryViewer();
+    });
+
+    function openStoryViewer() {
+        const story = activeStories[activeStoryIndex];
+        if (!story) { closeStoryViewer(); return; }
+        document.getElementById('storyViewer').hidden = false;
+        document.getElementById('storyViewerContent').innerHTML = story.imageUrl
+            ? `<img src="${story.imageUrl}" alt="">`
+            : `<p>${escapeHtml(story.text || '')}</p>`;
+        document.getElementById('storyProgress').style.width = `${((activeStoryIndex + 1) / activeStories.length) * 100}%`;
+        if (window.TojiAccount?.isLoggedIn()) AccountAPI.viewStory(story._id).catch(() => {});
+    }
+    function closeStoryViewer() { document.getElementById('storyViewer').hidden = true; }
+    document.getElementById('storyViewerClose')?.addEventListener('click', closeStoryViewer);
+    document.getElementById('storyNextBtn')?.addEventListener('click', () => { activeStoryIndex++; openStoryViewer(); });
+    document.getElementById('storyPrevBtn')?.addEventListener('click', () => { activeStoryIndex = Math.max(0, activeStoryIndex - 1); openStoryViewer(); });
 
     load();
 });

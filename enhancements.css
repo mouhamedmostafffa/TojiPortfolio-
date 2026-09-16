@@ -2532,3 +2532,34 @@ body.domain-reverting::before {
     .zaza-tour-nav { justify-content: space-between; }
 }
 
+/* ==================== فيد نشاط حي (activity-ticker.js) ==================== */
+.activity-ticker {
+    position: fixed;
+    top: 92px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 950;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: min(480px, calc(100% - 32px));
+    padding: 8px 18px;
+    border-radius: 999px;
+    background: rgba(20, 20, 24, 0.65);
+    border: 1px solid var(--glass-border, rgba(255,255,255,0.12));
+    backdrop-filter: blur(3px) saturate(140%);
+    -webkit-backdrop-filter: blur(3px) saturate(140%);
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.85);
+    white-space: nowrap;
+    overflow: hidden;
+}
+.activity-ticker svg { width: 13px; height: 13px; color: #6ec6ff; flex-shrink: 0; animation: activityPulse 1.8s ease-in-out infinite; }
+@keyframes activityPulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+.activity-ticker-text { overflow: hidden; text-overflow: ellipsis; transition: opacity 0.22s ease; }
+.light-theme .activity-ticker { background: rgba(255,255,255,0.85); color: rgba(30,25,15,0.85); border-color: rgba(58,52,40,0.14); }
+
+@media (max-width: 640px) {
+    .activity-ticker { top: 76px; font-size: 0.72rem; padding: 7px 14px; }
+}
+

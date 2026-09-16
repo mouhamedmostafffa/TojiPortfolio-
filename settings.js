@@ -59,6 +59,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             renderSongs(user.songs || []);
             renderLoginHistory(user.loginHistory || []);
             loadBlockedList();
+
+            // تخصيص البروفايل
+            document.getElementById('accentColorInput').value = user.accentColor || '#632626';
+            document.getElementById('accountTagSelect').value = user.accountTag || '';
+            document.getElementById('pinnedNoteInput').value = user.pinnedItem?.note || '';
+            if (user.coverImageUrl) {
+                document.getElementById('coverPreviewImg').src = user.coverImageUrl;
+                document.getElementById('coverPreviewImg').hidden = false;
+            }
+
+            updatePushButton(user.hasPushSubscription);
         } catch {}
         if (window.lucide) window.lucide.createIcons();
     }
@@ -292,6 +303,103 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.location.href = 'index.html';
         } catch (err) {
             status.textContent = err.message;
+            status.className = 'form-status is-error';
+        }
+    });
+
+    // ── تخصيص البروفايل: غلاف، لون، تصنيف، تثبيت ──
+    document.getElementById('coverInput')?.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        e.target.value = '';
+        if (!file) return;
+        try {
+            const res = await AccountAPI.uploadCover(file);
+            document.getElementById('coverPreviewImg').src = res.user.coverImageUrl;
+            document.getElementById('coverPreviewImg').hidden = false;
+            window.TojiAccount.toast('اتغيّر الغلاف! 🖼️');
+        } catch (err) {
+            window.TojiAccount.toast(err.message);
+        }
+    });
+
+    document.getElementById('customizeSaveBtn')?.addEventListener('click', async () => {
+        const status = document.getElementById('customizeStatus');
+        status.textContent = '...';
+        status.className = 'form-status';
+        try {
+            await AccountAPI.customizeProfile({
+                accentColor: document.getElementById('accentColorInput').value,
+                accountTag: document.getElementById('accountTagSelect').value,
+                pinnedItem: { type: 'note', note: document.getElementById('pinnedNoteInput').value.trim() }
+            });
+            status.textContent = 'اتحفظ! ✅';
+            status.className = 'form-status is-success';
+        } catch (err) {
+            status.textContent = err.message;
+            status.className = 'form-status is-error';
+        }
+    });
+
+    // ── تنبيهات المتصفح (Web Push) ──
+    function updatePushButton(isSubscribed) {
+        const btn = document.getElementById('pushEnableBtn');
+        if (!btn) return;
+        btn.textContent = isSubscribed ? '🔕 قفل تنبيهات المتصفح' : '🔔 فعّل تنبيهات المتصفح';
+        btn.dataset.subscribed = isSubscribed ? '1' : '0';
+    }
+
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+        const raw = atob(base64);
+        return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
+    }
+
+    document.getElementById('pushEnableBtn')?.addEventListener('click', async () => {
+        const status = document.getElementById('pushStatus');
+        const btn = document.getElementById('pushEnableBtn');
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+            status.textContent = 'المتصفح ده مش بيدعم تنبيهات المتصفح.';
+            status.className = 'form-status is-error';
+            return;
+        }
+        try {
+            if (btn.dataset.subscribed === '1') {
+                const reg = await navigator.serviceWorker.ready;
+                const sub = await reg.pushManager.getSubscription();
+                if (sub) {
+                    await AccountAPI.unsubscribePush(sub.endpoint);
+                    await sub.unsubscribe();
+                }
+                updatePushButton(false);
+                status.textContent = 'اتقفلت التنبيهات.';
+                status.className = 'form-status is-success';
+                return;
+            }
+
+            const keyRes = await AccountAPI.getVapidKey();
+            if (!keyRes.enabled) {
+                status.textContent = 'التنبيهات دي مش مفعّلة من صاحب الموقع لسه.';
+                status.className = 'form-status is-error';
+                return;
+            }
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') {
+                status.textContent = 'محتاج توافق على إذن التنبيهات من المتصفح.';
+                status.className = 'form-status is-error';
+                return;
+            }
+            const reg = await navigator.serviceWorker.ready;
+            const sub = await reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(keyRes.publicKey)
+            });
+            await AccountAPI.subscribePush(sub.toJSON());
+            updatePushButton(true);
+            status.textContent = 'اتفعّلت التنبيهات! 🔔';
+            status.className = 'form-status is-success';
+        } catch (err) {
+            status.textContent = err.message || 'حصل خطأ.';
             status.className = 'form-status is-error';
         }
     });

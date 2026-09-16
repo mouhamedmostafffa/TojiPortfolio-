@@ -91,6 +91,57 @@
         unblockUser: (username) => accountFetch(`/account/block/${encodeURIComponent(username)}`, { method: 'DELETE' }),
         addSong: (title, artist, url) => accountFetch('/account/songs', { method: 'POST', body: JSON.stringify({ title, artist, url }) }),
         removeSong: (songId) => accountFetch(`/account/songs/${songId}`, { method: 'DELETE' }),
+
+        // ريأكشنز + مؤشر الكتابة
+        reactToMessage: (messageId, emoji) => accountFetch(`/account/messages/${messageId}/react`, { method: 'POST', body: JSON.stringify({ emoji }) }),
+        unreactToMessage: (messageId) => accountFetch(`/account/messages/${messageId}/react`, { method: 'DELETE' }),
+        setTyping: (username) => accountFetch(`/account/messages/${username}/typing`, { method: 'POST' }),
+        getTyping: (username) => accountFetch(`/account/messages/${username}/typing`),
+
+        // ليدر بورد + مقارنة نشاط
+        getLeaderboard: () => accountFetch('/account/leaderboard'),
+        getPercentile: () => accountFetch('/account/me/percentile'),
+
+        // اكتشف حسابات
+        discover: () => accountFetch('/account/discover'),
+
+        // تخصيص البروفايل — غلاف، لون، تصنيف، تثبيت
+        customizeProfile: (data) => accountFetch('/account/customize', { method: 'PUT', body: JSON.stringify(data) }),
+        uploadCover: async (file) => {
+            const formData = new FormData();
+            formData.append('image', file);
+            const res = await fetch(`${API_BASE_URL}/account/cover`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${getToken()}` },
+                body: formData
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) throw new Error(data.message || 'فشل رفع الصورة');
+            return data;
+        },
+
+        // ستوريز
+        addStory: (text, imageUrl) => accountFetch('/account/stories', { method: 'POST', body: JSON.stringify({ text, imageUrl }) }),
+        uploadStoryImage: async (file) => {
+            const formData = new FormData();
+            formData.append('image', file);
+            const res = await fetch(`${API_BASE_URL}/account/stories/upload`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${getToken()}` },
+                body: formData
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) throw new Error(data.message || 'فشل رفع الصورة');
+            return data;
+        },
+        getStories: (username) => accountFetch(`/account/stories/${encodeURIComponent(username)}`),
+        viewStory: (storyId) => accountFetch(`/account/stories/${storyId}/view`, { method: 'POST' }),
+        getStoriesFeed: () => accountFetch('/account/stories-feed'),
+
+        // تنبيهات المتصفح
+        getVapidKey: () => accountFetch('/account/push/vapid-key'),
+        subscribePush: (subscription) => accountFetch('/account/push/subscribe', { method: 'POST', body: JSON.stringify({ subscription }) }),
+        unsubscribePush: (endpoint) => accountFetch('/account/push/subscribe', { method: 'DELETE', body: JSON.stringify({ endpoint }) }),
         claimDaily: () => accountFetch('/account/claim-daily-points', { method: 'POST' }),
         claimWeeklyChallenge: () => accountFetch('/account/claim-weekly-challenge', { method: 'POST' }),
         claimSurpriseBox: () => accountFetch('/account/claim-surprise-box', { method: 'POST' }),
